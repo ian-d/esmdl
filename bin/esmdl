@@ -1,0 +1,112 @@
+#!/usr/bin/env ruby
+require 'thor'
+require 'esmdl'
+require 'date'
+require 'yaml'
+
+module ESMRunner
+  class << self
+    def configure(options)
+      if File.exists?("#{Dir.home}/.esmdl") then
+        options = YAML.load(IO.read("#{Dir.home}/.esmdl")).merge options
+      end
+
+      options = options.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+
+      unless options[:password] && options[:username]
+        puts "ERROR: Couldn't find .esmdl file and --username/--password not passed."
+        exit
+      end
+
+      ESMDl.configure do |config|
+        config.username = options[:username]
+        config.password = options[:password]
+        config.stage_dir = options[:stage_dir]
+        config.base_url = options[:base_url]
+        config.esmversion = options[:esmversion]
+      end
+
+      begin
+        ESMDl.fetch_metadata
+      rescue Exception => e
+        puts "There was an error fetching the ESM metadata. Double check your username and password?"
+        puts e.message
+        exit
+      end
+    end
+  end
+
+  class List < Thor
+    desc 'products', 'List licensed products and categories.'
+    option :filter, default: '.*', desc: 'A regex to apply to product names.'
+    def products
+      ESMRunner.configure parent_options
+      ESMDl.products.each do |k, v|
+        puts "#{k}: #{v}" if v =~ /#{options[:filter]}/i
+      end
+    end
+
+    desc 'releases', 'List available releases.'
+    option :product, desc: 'The product name (BNR_ADVSS, BXE_STUAPI, etc) to list.'
+    option :filter, default: '.', desc: 'A regex to apply to release names.'
+    def releases
+      ESMRunner.configure parent_options
+      rel_list = []
+      ESMDl.releases.each do |r|
+        rel_list << r if r['productId'] == options[:product] || options[:product].nil?
+      end
+      rel_list.keep_if{ |x| x['name'] =~ /#{options[:filter]}/i || x['rlsArtifactsFile'] =~ /#{options[:filter]}/i}
+      rel_list.sort! { |l, r| DateTime.parse(l['rlsDate']) <=> DateTime.parse(r['rlsDate']) }
+      rel_list.each do |r|
+        puts "#{r['name']} (#{r['rlsArtifactsFile']}) - #{r['productId']} -#{DateTime.parse(r['rlsDate']).to_date}"
+      end
+    end
+
+    desc 'info', 'List information about a single release.'
+    option :name, required: true, desc: 'The patch archive name (ex: twb80600u.trz, student-overall-90400u.trz).'
+    def info
+      ESMRunner.configure parent_options
+      rel = ESMDl.releases.find { |x| x['rlsArtifactsFile'] == options[:name] }
+      if !rel.nil?
+        say rel['name'], :green
+        puts "Product: #{rel['productId']}"
+        puts "Version: #{rel['version']}"
+        puts "Status: #{rel['status']}"
+        puts "Release Date: #{DateTime.parse(rel['rlsDate']).to_date}"
+        puts "Has Docs: #{rel['rlsDocFile'] != ''}"
+      else
+        say 'Could not find a release by that name.', :yellow
+      end
+    end
+  end
+
+  class ESMCli < Thor
+    default_task :help
+
+    class_option :username, type: :string
+    class_option :password, type: :string
+    class_option :stage_dir, type: :string, default: './'
+    class_option :base_url, type: :string, default: 'https://esmsvc.ellucian.com:8443'
+    class_option :esmversion, type: :string, default: '1.7'
+    #class_option :verbose, type: :boolean, default: false
+
+    desc 'list [products, releases, info]', 'list products, releases, or single release info'
+    subcommand 'list', List
+
+    desc 'get', 'Download patches, documentation, and release artifacts.'
+    option :name, required: true, desc: 'The patch archive name to download (ex: twb80600u.trz, student-overall-90400u.trz).'
+    option :docs, type: :boolean, default: true, desc: 'Download documentation if available.'
+    option :metadata, type: :boolean, default: false, desc: 'Download ESM installation metadata.'
+    def get
+      ESMRunner.configure options
+      rel = ESMDl.releases.find { |x| x['rlsArtifactsFile'] == options[:name] }
+      if !rel.nil? then
+        ESMDl::Download.new(rel, options[:docs], options[:metadata])
+      else
+        say 'Could not find a release by that name.', :yellow
+      end
+    end
+  end
+end
+
+ESMRunner::ESMCli.start
