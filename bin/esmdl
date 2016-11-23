@@ -94,16 +94,18 @@ module ESMRunner
     subcommand 'list', List
 
     desc 'get', 'Download patches, documentation, and release artifacts.'
-    option :name, required: true, desc: 'The patch archive name to download (ex: twb80600u.trz, student-overall-90400u.trz).'
+    option :name, required: true, desc: 'Single name or comma-delimited list of patch archive name(s) to download (ex: twb80600u.trz,student-overall-90400u.trz).'
     option :docs, type: :boolean, default: true, desc: 'Download documentation if available.'
     option :metadata, type: :boolean, default: false, desc: 'Download ESM installation metadata.'
     def get
       ESMRunner.configure options
-      rel = ESMDl.releases.find { |x| x['rlsArtifactsFile'] == options[:name] }
-      if !rel.nil? then
-        ESMDl::Download.new(rel, options[:docs], options[:metadata])
-      else
-        say 'Could not find a release by that name.', :yellow
+      options[:name].split(',').each do |rel|
+        rel.strip!
+        if ESMDl.releases.any? { |x| x['rlsArtifactsFile'] == rel }
+          ESMDl::Download.new(rel, options[:docs], options[:metadata])
+        else
+          say "Could not find a release named #{rel}.", :yellow
+        end
       end
     end
   end
