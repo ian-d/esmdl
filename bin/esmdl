@@ -101,8 +101,9 @@ module ESMRunner
       ESMRunner.configure options
       options[:name].split(',').each do |rel|
         rel.strip!
-        if ESMDl.releases.any? { |x| x['rlsArtifactsFile'] == rel }
-          ESMDl::Download.new(rel, options[:docs], options[:metadata])
+        rel_entry = nil
+        if rel_entry = ESMDl.releases.find { |x| x['rlsArtifactsFile'] == rel }
+          ESMDl::Download.new(rel_entry, options[:docs], options[:metadata])
         else
           say "Could not find a release named #{rel}.", :yellow
         end
