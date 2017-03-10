@@ -87,7 +87,7 @@ module ESMRunner
     class_option :password, type: :string
     class_option :stage_dir, type: :string, default: './'
     class_option :base_url, type: :string, default: 'https://esmsvc.ellucian.com:8443'
-    class_option :esmversion, type: :string, default: '1.7'
+    class_option :esmversion, type: :string, default: '1.8'
     #class_option :verbose, type: :boolean, default: false
 
     desc 'list [products, releases, info]', 'list products, releases, or single release info'

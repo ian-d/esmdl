@@ -1,3 +1,8 @@
+## 0.1.3 (2017-03-10)
+Changes:
+
+  - bumped default esmversion to 1.8
+
 ## 0.1.2 (2016-11-28)
 Changes:
 

@@ -19,7 +19,7 @@ The only required configuration parameters are the `username` and `password` of 
 username: "myusername"
 password: "!s3cr3t*"
 ```
-or via the command line arguments `--username` and `--password`. The other available configuration values are `esmversion` (defaults to 1.7), `stage_dir` (defaults to './'), and `base_url`. Command line parameters override any parameters from `~/.esmdl`.
+or via the command line arguments `--username` and `--password`. The other available configuration values are `esmversion` (defaults to 1.8), `stage_dir` (defaults to './'), and `base_url`. Command line parameters override any parameters from `~/.esmdl`.
 
 ## Usage
 Downloading a release, associated documentation, and ESM installation metadata:
