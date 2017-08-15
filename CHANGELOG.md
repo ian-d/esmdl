@@ -1,3 +1,9 @@
+## 0.1.4 (2017-08-15)
+Changes:
+
+  - Defaulted to AES128-SHA cipher, since HTTPS to esmsvc.ellucian.com fails on OpenSSL 1.0.2k due to small DH keysize of server.
+  - Fix case of "null" file download for releases w/out document or install metadata artifacts.
+
 ## 0.1.3 (2017-03-10)
 Changes:
 
