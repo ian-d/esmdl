@@ -22,20 +22,25 @@ module ESMDl
     end
 
     def fetch(url, filename)
-      uri = URI(url)
+      return if filename == "null"
       full_path = "#{ESMDl.config.stage_dir}#{filename}"
       print "Starting download of #{full_path}..."
-      Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
-        request = Net::HTTP::Get.new uri.request_uri
-        request.basic_auth ESMDl.config.username, ESMDl.config.password
-        http.request request do |response|
-          open full_path, 'w' do |io|
-            response.read_body do |chunk|
-              io.write chunk
-            end
+
+      uri = URI(url)
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+      http.ciphers = ['AES128-SHA']
+
+      request = Net::HTTP::Get.new uri.request_uri
+      request.basic_auth ESMDl.config.username, ESMDl.config.password
+      http.request request do |response|
+        open full_path, 'w' do |io|
+          response.read_body do |chunk|
+            io.write chunk
           end
         end
       end
+
       filesize = File::size(full_path)
       puts "done! (#{ Filesize.from("#{filesize} B").pretty})"
     end

@@ -22,18 +22,19 @@ module ESMDl
   end
 
   def self.fetch_metadata
-    uri = URI(config.base_url + "/releaseservices/AvailableReleases?esmversion=#{config.esmversion}")
     r = nil
-
-    Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
-      request = Net::HTTP::Get.new uri.request_uri
-      request.basic_auth config.username, config.password
-      response = http.request request
-      if response.code != '200'
-        raise "Problem fetching ESM metadata: #{response.body}"
-      end
-      r = JSON.parse(response.body)
+    uri = URI(config.base_url + "/releaseservices/AvailableReleases?esmversion=#{config.esmversion}")
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+    http.ciphers = ['AES128-SHA']
+    request = Net::HTTP::Get.new uri.request_uri
+    request.basic_auth config.username, config.password
+    response = http.request request
+    if response.code != '200'
+      raise "Problem fetching ESM metadata: #{response.body}"
     end
+    r = JSON.parse(response.body)
+
     @products = {}
     @codemap = {}
     r['prodCodeMap'].split("\n").each do |line|
