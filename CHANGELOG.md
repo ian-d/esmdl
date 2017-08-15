@@ -1,3 +1,8 @@
+## 0.1.5 (2017-08-15)
+Changes:
+
+  - Reverting to block-style downloads and just passing the cipher to HTTP.start. (Should have RTFM, jumped the gun on v0.1.4.)
+
 ## 0.1.4 (2017-08-15)
 Changes:
 
