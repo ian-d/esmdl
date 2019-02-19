@@ -24,7 +24,7 @@ module ESMDl
   def self.fetch_metadata
     r = nil
     uri = URI(config.base_url + "/releaseservices/AvailableReleases?esmversion=#{config.esmversion}")
-    Net::HTTP.start(uri.host, uri.port, use_ssl: true, ciphers: "AES128-SHA") do |http|
+    Net::HTTP.start(uri.host, uri.port, use_ssl: true, ciphers: "TLSv1.2:!aNULL:!eNULL", ssl_version: "TLSv1_2") do |http|
       request = Net::HTTP::Get.new uri.request_uri
       request.basic_auth config.username, config.password
       response = http.request request
