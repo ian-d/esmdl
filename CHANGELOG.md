@@ -1,3 +1,8 @@
+## 0.1.6 (2019-02-20)
+Changes:
+
+ - Updating HTTPS request options for Ellucian TLS changes.
+
 ## 0.1.5 (2017-08-15)
 Changes:
 
