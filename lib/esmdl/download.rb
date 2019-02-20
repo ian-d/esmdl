@@ -27,7 +27,7 @@ module ESMDl
       print "Starting download of #{full_path}..."
 
       uri = URI(url)
-      Net::HTTP.start(uri.host, uri.port, use_ssl: true, ciphers: "AES128-SHA") do |http|
+      Net::HTTP.start(uri.host, uri.port, use_ssl: true, ciphers: "TLSv1.2:!aNULL:!eNULL", ssl_version: "TLSv1_2") do |http|
         request = Net::HTTP::Get.new uri.request_uri
         request.basic_auth ESMDl.config.username, ESMDl.config.password
         http.request request do |response|
