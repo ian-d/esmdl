@@ -12,12 +12,13 @@ module ESMRunner
       end
 
       options = options.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+      options[:esmversion] = '22.1' if options[:esmversion].to_s.empty?
 
       unless options[:password] && options[:username]
         puts "ERROR: Couldn't find .esmdl file and --username/--password not passed."
         exit
       end
-
+              
       ESMDl.configure do |config|
         config.username = options[:username]
         config.password = options[:password]
@@ -87,7 +88,7 @@ module ESMRunner
     class_option :password, type: :string
     class_option :stage_dir, type: :string, default: './'
     class_option :base_url, type: :string, default: 'https://esmsvc.ellucian.com:8443'
-    class_option :esmversion, type: :string, default: '1.8'
+    class_option :esmversion, type: :string
     #class_option :verbose, type: :boolean, default: false
 
     desc 'list [products, releases, info]', 'list products, releases, or single release info'
