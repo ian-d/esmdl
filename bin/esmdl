@@ -18,7 +18,7 @@ module ESMRunner
         puts "ERROR: Couldn't find .esmdl file and --username/--password not passed."
         exit
       end
-              
+
       ESMDl.configure do |config|
         config.username = options[:username]
         config.password = options[:password]
